@@ -179,6 +179,29 @@ textarea#code { flex: 1; min-width: 0; border: 0; resize: none; background: tran
     try { localStorage.setItem(PREFIX + key, JSON.stringify(value)); } catch (e) { /* ignore */ }
   }
 
+  // Browser drafts saved by an older room under other keys (pack.json
+  // "legacyStorage"): copy each one to its drill's current key, once, unless
+  // that key already holds your own code. The old keys are left in place.
+  function migrateLegacy(leg) {
+    if (!leg || !leg.drills) return;
+    try {
+      var flag = PREFIX + "legacy-migrated";
+      if (localStorage.getItem(flag)) return;
+      Object.keys(leg.drills).forEach(function (old) {
+        var d = BY_ID[leg.drills[old]];
+        if (!d) return;
+        d.languages.forEach(function (l) {
+          var v = localStorage.getItem((leg.prefix || "drillroom.") + "code." + l + "." + old);
+          if (v === null) return;
+          var to = PREFIX + "code." + l + "." + d.id;
+          var cur = localStorage.getItem(to);
+          if (cur === null || cur === JSON.stringify(d.starters[l])) localStorage.setItem(to, v);
+        });
+      });
+      localStorage.setItem(flag, "1");
+    } catch (e) { /* storage blocked: nothing to migrate */ }
+  }
+
   // ---------------- Elements ----------------
   var $ = function (id) { return document.getElementById(id); };
 
@@ -188,6 +211,7 @@ textarea#code { flex: 1; min-width: 0; border: 0; resize: none; background: tran
   DRILLS.forEach(function (d) { BY_ID[d.id] = d; });
   pack.languages.forEach(function (l) { LANG_LABEL[l.id] = l.id === "typescript" ? "TypeScript · types not checked" : l.label; });
   PREFIX = "drillroom." + pack.key + ".";
+  migrateLegacy(pack.legacyStorage);
   $("brandTitle").textContent = pack.title;
   document.title = pack.title === "Drill Room" ? "Drill Room" : pack.title + " · Drill Room";
   pack.languages.forEach(function (l) {
@@ -211,6 +235,15 @@ textarea#code { flex: 1; min-width: 0; border: 0; resize: none; background: tran
 
   function starter(n) { return BY_ID[n].starters[lang]; }
   function codeKey(n) { return "code." + lang + "." + n; }
+  // The browser copy of your code. Untouched starter code is never stored, so it
+  // can't hide a solution saved in the pack's solutions/ folder.
+  function saveCode(n, value) {
+    if (value === starter(n)) {
+      try { localStorage.removeItem(PREFIX + codeKey(n)); } catch (e) { /* ignore */ }
+      return;
+    }
+    save(codeKey(n), value);
+  }
 
   function statusLabel(n) {
     var d = BY_ID[n], l = d.languages.indexOf(prefLang) >= 0 ? prefLang : d.languages[0];
@@ -238,6 +271,7 @@ textarea#code { flex: 1; min-width: 0; border: 0; resize: none; background: tran
   }
 
   function showDrill(n) {
+    clearTimeout(saveTimer);
     current = n;
     save("current", n);
     problem.innerHTML = "";
@@ -276,7 +310,7 @@ textarea#code { flex: 1; min-width: 0; border: 0; resize: none; background: tran
         .then(function (r) { return r.json(); })
         .then(function (j) {
           if (j.code && lang + ":" + current === want && code.value === starter(n)) {
-            code.value = j.code; syncGutter(); save(codeKey(n), code.value);
+            code.value = j.code; syncGutter(); saveCode(n, code.value);
             $("saveInfo").textContent = "Loaded your saved solution";
           }
         }).catch(function () { /* offline: keep the starter */ });
@@ -335,7 +369,7 @@ textarea#code { flex: 1; min-width: 0; border: 0; resize: none; background: tran
   }
 
   function doSave() {
-    save(codeKey(current), code.value);
+    saveCode(current, code.value);
     fetch("/api/save", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -368,7 +402,8 @@ textarea#code { flex: 1; min-width: 0; border: 0; resize: none; background: tran
   code.addEventListener("input", function () {
     syncGutter();
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(function () { save(codeKey(current), code.value); }, 300);
+    var n = current;
+    saveTimer = setTimeout(function () { if (current === n) saveCode(n, code.value); }, 300);
   });
   // Replace a range through execCommand so the browser's undo stack keeps working.
   function replaceRange(start, end, text, selStart, selEnd) {
@@ -458,7 +493,7 @@ textarea#code { flex: 1; min-width: 0; border: 0; resize: none; background: tran
 
   function doRun() {
     var n = current;
-    save(codeKey(n), code.value);
+    saveCode(n, code.value);
     busy(true);
     outTitle.textContent = "Run · " + partTag() + "sample tests";
     output.innerHTML = '<p class="hint">Running…</p>';
@@ -516,7 +551,7 @@ textarea#code { flex: 1; min-width: 0; border: 0; resize: none; background: tran
 
   function doSubmit() {
     var n = current, d = BY_ID[n], before = unlocked;
-    save(codeKey(n), code.value);
+    saveCode(n, code.value);
     busy(true);
     outTitle.textContent = "Submit · " + (d.multipart ? (part > 1 ? "parts 1–" + part + " · " : "part 1 · ") : "") + "hidden tests";
     output.innerHTML = '<p class="hint">Running hidden tests…</p>';
@@ -583,7 +618,7 @@ textarea#code { flex: 1; min-width: 0; border: 0; resize: none; background: tran
 
   // ---------------- Wiring ----------------
   langSel.addEventListener("change", function () {
-    save(codeKey(current), code.value);
+    saveCode(current, code.value);
     prefLang = this.value; save("lang", prefLang);
     showDrill(current);
   });
@@ -593,14 +628,14 @@ textarea#code { flex: 1; min-width: 0; border: 0; resize: none; background: tran
     loadState(current, null);
     clearOutput();
   });
-  drillSel.addEventListener("change", function () { save(codeKey(current), code.value); showDrill(this.value); });
+  drillSel.addEventListener("change", function () { saveCode(current, code.value); showDrill(this.value); });
   $("saveBtn").addEventListener("click", doSave);
   $("runBtn").addEventListener("click", doRun);
   $("submitBtn").addEventListener("click", doSubmit);
   $("resetBtn").addEventListener("click", function () { $("resetConfirm").hidden = false; this.hidden = true; });
   $("resetNo").addEventListener("click", function () { $("resetConfirm").hidden = true; $("resetBtn").hidden = false; });
   $("resetYes").addEventListener("click", function () {
-    code.value = starter(current); syncGutter(); save(codeKey(current), code.value);
+    code.value = starter(current); syncGutter(); saveCode(current, code.value);
     $("resetConfirm").hidden = true; $("resetBtn").hidden = false; clearOutput();
   });
 

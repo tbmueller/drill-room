@@ -89,7 +89,12 @@ Every field is optional. `languages` defaults to all three; `notes` shows a
 line above the statement for that language; `folders` lists where drill folders
 live (default `["drills"]`). `groups` sorts drills into labelled sections of
 the drill menu, numbered within each group; `"drills": [...]` instead picks and
-orders them without groups; with neither, every drill folder is used. Your browser drafts are
+orders them without groups; with neither, every drill folder is used.
+
+If you used an earlier version of a pack whose drills had other ids, add
+`"legacyStorage": {"drills": {"1": "01-two-sum", "2": "02-islands"}}` and the
+page copies your browser drafts from the old keys (`drillroom.code.<language>.<old id>`)
+the first time it opens. It never overwrites code you've already written. Your browser drafts are
 stored per pack under the pack folder's name, or under `"key"` if you set one.
 
 ### drill.json

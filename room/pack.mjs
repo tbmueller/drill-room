@@ -238,6 +238,16 @@ function loadDrill(dir, id, packLanguages) {
   };
 }
 
+// pack.json "legacyStorage": { "prefix"?: "drillroom.", "drills": { "<old id>": "<drill id>" } }
+// lets the page carry browser drafts over from keys an older room used.
+function legacyStorage(value, ids) {
+  if (value === undefined) return null;
+  const ok = value && typeof value === "object" && value.drills && typeof value.drills === "object" &&
+    Object.values(value.drills).every((id) => ids.includes(id)) && (value.prefix === undefined || typeof value.prefix === "string");
+  if (!ok) throw new PackError('pack.json "legacyStorage" must be {"drills": {"<old id>": "<drill id>"}} naming drills in the pack');
+  return { prefix: value.prefix || "drillroom.", drills: value.drills };
+}
+
 export function loadPack(packDir) {
   const dir = resolve(packDir);
   try {
@@ -297,6 +307,7 @@ export function loadPack(packDir) {
       title: typeof meta.title === "string" ? meta.title : "Drill Room",
       languages,
       notes: meta.notes && typeof meta.notes === "object" ? meta.notes : {},
+      legacyStorage: legacyStorage(meta.legacyStorage, all),
       groups: groups.map((g) => ({ title: g.title, drills: g.ids })),
       drills,
       byId: Object.fromEntries(drills.map((d) => [d.id, d])),
@@ -315,6 +326,7 @@ export function publicView(pack) {
     title: pack.title,
     languages: pack.languages.map((id) => ({ id, label: LANG_META[id].label })),
     notes: pack.notes,
+    legacyStorage: pack.legacyStorage,
     groups: pack.groups,
     drills: pack.drills.map((d) => ({
       id: d.id, number: d.number, group: d.group, title: d.title, difficulty: d.difficulty, time: d.time,

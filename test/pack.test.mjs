@@ -138,3 +138,10 @@ for (const [what, edit, message] of [
     assert.throws(() => loadPack(brokenPack(t, edit)), message);
   });
 }
+
+test("legacyStorage maps old browser-draft ids to drills, and must name real drills", (t) => {
+  const ok = brokenPack(t, (d) => writeFileSync(join(d, "pack.json"), JSON.stringify({ legacyStorage: { drills: { 1: "01-reverse-words" } } })));
+  assert.deepEqual(publicView(loadPack(ok)).legacyStorage, { prefix: "drillroom.", drills: { 1: "01-reverse-words" } });
+  const bad = brokenPack(t, (d) => writeFileSync(join(d, "pack.json"), JSON.stringify({ legacyStorage: { drills: { 1: "nope" } } })));
+  assert.throws(() => loadPack(bad), /"legacyStorage" must be/);
+});
