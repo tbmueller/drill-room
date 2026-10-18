@@ -1,0 +1,6 @@
+[
+  { "args": { "ops": [["min"], ["top"], ["pop"]] }, "expected": [null, null, null] },
+  { "args": { "ops": [["push", 5], ["push", 5], ["pop"], ["min"]] }, "expected": [5, 5] },
+  { "args": { "ops": [["push", 2], ["push", 0], ["push", 3], ["push", 0], ["min"], ["pop"], ["min"], ["pop"], ["min"], ["pop"], ["min"]] }, "expected": [0, 0, 0, 3, 0, 0, 2] },
+  { "args": { "ops": [["push", -4], ["top"], ["push", 7], ["top"], ["min"]] }, "expected": [-4, 7, -4] }
+]

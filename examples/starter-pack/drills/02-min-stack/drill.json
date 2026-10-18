@@ -1,0 +1,7 @@
+{
+  "title": "Min stack",
+  "difficulty": "Easy–medium",
+  "time": "~10 min",
+  "tags": ["Classes", "Stacks"],
+  "call": { "typescript": "MinStack", "python": "MinStack", "ruby": "MinStack" }
+}

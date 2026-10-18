@@ -1,0 +1,7 @@
+[
+  { "args": { "text": "" }, "expected": "" },
+  { "args": { "text": "   \n\t " }, "expected": "" },
+  { "args": { "text": "a b c d" }, "expected": "d c b a" },
+  { "args": { "text": "line one\nline two" }, "expected": "two line one line" },
+  { "args": { "text": "  same  same " }, "expected": "same same" }
+]

@@ -1,0 +1,5 @@
+node_modules/
+.DS_Store
+__pycache__/
+# Your saved code lives in each pack's solutions/ folder; don't commit the example pack's.
+examples/*/solutions/

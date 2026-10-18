@@ -1,0 +1,8 @@
+{
+  "title": "Starter pack",
+  "languages": ["typescript", "python", "ruby"],
+  "notes": {
+    "python": "Python: use the snake_case names from the starter (reverse_words, MinStack.get_min).",
+    "ruby": "Ruby: use the names from the starter (reverse_words, MinStack#min)."
+  }
+}

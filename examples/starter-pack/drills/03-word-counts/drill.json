@@ -1,0 +1,11 @@
+{
+  "title": "Word counts",
+  "difficulty": "Medium",
+  "time": "~20 min",
+  "tags": ["Multi-part", "Hashing", "Sorting"],
+  "timer": 30,
+  "parts": [
+    { "call": { "typescript": "countWords", "python": "count_words", "ruby": "count_words" }, "args": ["text"] },
+    { "call": { "typescript": "topWords", "python": "top_words", "ruby": "top_words" }, "args": ["text", "k"] }
+  ]
+}

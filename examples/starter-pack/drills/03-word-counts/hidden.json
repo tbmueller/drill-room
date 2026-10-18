@@ -1,0 +1,14 @@
+{
+  "1": [
+    { "args": { "text": "" }, "expected": {} },
+    { "args": { "text": "Don't stop; DON'T!" }, "expected": { "don't": 2, "stop": 1 } },
+    { "args": { "text": "a1b2c" }, "expected": { "a": 1, "b": 1, "c": 1 } },
+    { "args": { "text": "  \n\t " }, "expected": {} }
+  ],
+  "2": [
+    { "args": { "text": "", "k": 3 }, "expected": [] },
+    { "args": { "text": "x y z", "k": 2 }, "expected": [["x", 1], ["y", 1]] },
+    { "args": { "text": "one two two", "k": 5 }, "expected": [["two", 2], ["one", 1]] },
+    { "args": { "text": "B b a A c", "k": 1 }, "expected": [["a", 2]] }
+  ]
+}

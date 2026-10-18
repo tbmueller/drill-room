@@ -1,0 +1,4 @@
+{
+  "1": [{ "args": { "text": "The cat and the hat." }, "expected": { "the": 2, "cat": 1, "and": 1, "hat": 1 } }],
+  "2": [{ "args": { "text": "b a b c a b", "k": 2 }, "expected": [["b", 3], ["a", 2]] }]
+}

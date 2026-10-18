@@ -1,0 +1,14 @@
+{
+  "name": "drill-room",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A local practice judge for TypeScript, Python and Ruby coding drills",
+  "scripts": {
+    "start": "node room/server.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "license": "MIT"
+}

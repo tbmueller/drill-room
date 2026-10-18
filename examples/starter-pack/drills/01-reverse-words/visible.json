@@ -1,0 +1,4 @@
+[
+  { "args": { "text": "  the quick\tbrown   fox " }, "expected": "fox brown quick the" },
+  { "args": { "text": "hello" }, "expected": "hello" }
+]

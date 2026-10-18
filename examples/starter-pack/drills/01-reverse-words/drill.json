@@ -1,0 +1,8 @@
+{
+  "title": "Reverse words",
+  "difficulty": "Easy",
+  "time": "~5 min",
+  "tags": ["Strings"],
+  "call": { "typescript": "reverseWords", "python": "reverse_words", "ruby": "reverse_words" },
+  "args": ["text"]
+}
